@@ -1,10 +1,11 @@
 from flask import Flask, request, json
 import requests
-import openai
+from openai import OpenAI
+client = OpenAI()
 import os
 
 # Set up OpenAI API credentials
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client.api_key = os.getenv("OPENAI_API_KEY")
 
 app = Flask(__name__)
 port = 5005
@@ -29,15 +30,21 @@ def index():
         print(message_text)
 
         room_id = data.get('data').get('roomId')
-        # Generate text using GPT-3
-        response = openai.Completion.create(
-            model="text-davinci-003",
-            prompt=message_text,
-            n=1,
-            max_tokens=70,
-            temperature=1,
+        # Generate text using GPT-3.5
+        response = client.chat.completions.create(
+            model = "gpt-3.5-turbo",
+            messages = [
+                {
+                    "role": "user", 
+                    "content": message_text
+                 }
+                 ],
+            temperature = 1,
+            n = 1,
+            max_tokens = 70   
         )
-        reply = response.choices[0].text
+        
+        reply = response.choices[0].message.content
         # Print the generated text
         print(reply)
 
